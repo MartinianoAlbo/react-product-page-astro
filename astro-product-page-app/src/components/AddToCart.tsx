@@ -3,10 +3,9 @@ import { api, type Product, type ProductVariation } from '@/lib/api';
 
 interface AddToCartProps {
   product: Product;
-  nonce: string;
 }
 
-export default function AddToCart({ product, nonce }: AddToCartProps) {
+export default function AddToCart({ product }: AddToCartProps) {
   const [quantity, setQuantity] = useState(1);
   const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null);
   const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
@@ -14,20 +13,17 @@ export default function AddToCart({ product, nonce }: AddToCartProps) {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [cartCount, setCartCount] = useState(0);
 
-  // Configurar nonce al montar
+  // Configurar nonce al montar 
   useEffect(() => {
-    if (nonce) {
-      api.setNonce(nonce);
-    }
-    // Obtener contador del carrito inicial
+    api.setNonce((window as any).rppData.nonce);
     fetchCartCount();
-  }, [nonce]);
+  }, []);
 
   // Para productos variables, establecer variación por defecto
   useEffect(() => {
     if (product.type === 'variable' && product.variations.length > 0) {
       // Encontrar primera variación en stock
-      const defaultVariation = product.variations.find(v => v.purchasable) || product.variations[0];
+      const defaultVariation = product.variations.find(v => v.stock_status === 'instock') || product.variations[0];
       setSelectedVariation(defaultVariation);
       setSelectedAttributes(defaultVariation.attributes);
     }
@@ -126,7 +122,7 @@ export default function AddToCart({ product, nonce }: AddToCartProps) {
                 onChange={(e) => handleAttributeChange(attribute.name, e.target.value)}
               >
                 <option value="">Seleccionar {attribute.name}</option>
-                {attribute.options.map((option) => (
+                {attribute.options.map((option: string) => (
                   <option key={option} value={option}>
                     {option}
                   </option>

@@ -70,27 +70,18 @@ export interface Cart {
   coupons: string[];
 }
 
+const WP_API_URL        = import.meta.env.WP_API_URL as string;          // p.ej. 'http://saphirus.local/wp-json'
+const WC_CONSUMER_KEY   = import.meta.env.WC_CONSUMER_KEY as string;    // tu CK
+const WC_CONSUMER_SECRET= import.meta.env.WC_CONSUMER_SECRET as string; // tu CS
+
 class WordPressAPI {
   private baseUrl: string;
   private nonce: string;
 
   constructor() {
-    // Configurar baseUrl según el entorno usando variables de entorno
-    const wpApiUrl = import.meta.env.WP_API_URL || 'http://saphirus.local/wp-json';
-    
-    if (import.meta.env.DEV) {
-      // En desarrollo, usar la URL del .env
-      this.baseUrl = `${wpApiUrl}/rpp/v1`;
-    } else if (typeof window !== 'undefined') {
-      // En el cliente (navegador), usar URL directa
-      this.baseUrl = `${window.location.origin}/wp-json/rpp/v1`;
-    } else {
-      // En el servidor, usar URL completa del WordPress desde .env
-      this.baseUrl = `${wpApiUrl}/rpp/v1`;
-    }
-    
-    // El nonce se pasará desde WordPress
-    this.nonce = '';
+    this.baseUrl = `${WP_API_URL}/rpp/v1`;
+    this.nonce   = '';
+    console.log(this.baseUrl);
   }
 
   setNonce(nonce: string) {
@@ -126,9 +117,7 @@ class WordPressAPI {
     return this.fetch(`/product/${id}`);
   }
 
-  async getProductBySlug(slug: string): Promise<Product> {
-    return this.fetch(`/product/slug/${slug}`);
-  }
+  
 
   async getRelatedProducts(id: number, limit: number = 4) {
     return this.fetch(`/product/${id}/related?limit=${limit}`);
@@ -154,6 +143,24 @@ class WordPressAPI {
   async getCart(): Promise<Cart> {
     return this.fetch('/cart');
   }
+
+  async getProductBySlug(slug: string): Promise<Product> {
+    return this.fetch(`/product/slug/${slug}`);
+  }
+
+  async getProductBySlugDirect(slug: string): Promise<Product> {
+    // Construye la URL añadiendo consumer_key y consumer_secret
+    const url = new URL(`${WP_API_URL}/wc/v3/products`);
+    url.searchParams.set('slug', slug);
+    url.searchParams.set('consumer_key', WC_CONSUMER_KEY);
+    url.searchParams.set('consumer_secret', WC_CONSUMER_SECRET);
+
+    const res = await fetch(url.toString());
+    if (!res.ok) throw new Error(`WooCommerce API error: ${res.status}`);
+    const [product] = await res.json();
+    return product;
+  }
+  
 }
 
 // Singleton para usar en toda la app

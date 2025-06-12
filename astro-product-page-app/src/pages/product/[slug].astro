@@ -25,14 +25,6 @@ let product: Product | null = null;
 let error: string | null = null;
 
 try {
-  // Si estamos en el navegador (desarrollo), configurar el nonce
-  if (typeof window !== 'undefined') {
-    const rootElement = document.getElementById('react-product-root');
-    if (rootElement) {
-      const nonce = rootElement.dataset.nonce || '';
-      api.setNonce(nonce);
-    }
-  }
   
   product = await api.getProductBySlug(slug);
 } catch (e) {
@@ -50,7 +42,7 @@ const seoTitle = `${product.name} - ${Astro.site}`;
 const seoDescription = product.short_description || product.description.substring(0, 160);
 ---
 
-<ProductLayout title={seoTitle} description={seoDescription}>
+<ProductLayout title={seoTitle} description={seoDescription} client:load>
   <div id="product-content" class="rpp-container rpp-mx-auto rpp-px-4">
   
 
@@ -63,14 +55,13 @@ const seoDescription = product.short_description || product.description.substrin
 
       <!-- Info Column -->
       <div class="rpp-product-info">
-        <ProductInfo product={product} />
+        <ProductInfo client:visible product={product} />
         
         <!-- Add to Cart Component (React Island) -->
         <div class="rpp-mt-8">
           <AddToCart 
             client:load
             product={product}
-            nonce={Astro.url.searchParams.get('nonce') || ''}
           />
         </div>
       </div>
