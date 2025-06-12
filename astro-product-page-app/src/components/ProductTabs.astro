@@ -1,0 +1,281 @@
+---
+import type { Product } from '@/lib/api';
+
+export interface Props {
+  product: Product;
+}
+
+const { product } = Astro.props;
+
+// Tabs disponibles
+const tabs = [
+  {
+    id: 'description',
+    label: 'Descripción',
+    show: !!product.description
+  },
+  {
+    id: 'additional',
+    label: 'Información adicional',
+    show: product.attributes.length > 0 || product.weight || product.dimensions.length
+  },
+  {
+    id: 'reviews',
+    label: `Reseñas (${product.review_count})`,
+    show: true
+  }
+].filter(tab => tab.show);
+---
+
+<div class="rpp-product-tabs" data-tabs>
+  <!-- Tab Headers -->
+  <div class="rpp-border-b rpp-border-gray-200">
+    <nav class="rpp--mb-px rpp-flex rpp-space-x-8" aria-label="Tabs">
+      {tabs.map((tab, index) => (
+        <button
+          type="button"
+          data-tab-trigger={tab.id}
+          class={`
+            rpp-tab-trigger rpp-py-4 rpp-px-1 rpp-border-b-2 rpp-font-medium rpp-text-sm
+            ${index === 0
+              ? 'rpp-border-primary-500 rpp-text-primary-600'
+              : 'rpp-border-transparent rpp-text-gray-500 hover:rpp-text-gray-700 hover:rpp-border-gray-300'
+            }
+          `}
+          aria-selected={index === 0}
+          aria-controls={`panel-${tab.id}`}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </nav>
+  </div>
+
+  <!-- Tab Panels -->
+  <div class="rpp-py-6">
+    {/* Descripción */}
+    {product.description && (
+      <div
+        id="panel-description"
+        data-tab-panel="description"
+        class="rpp-tab-panel"
+        role="tabpanel"
+        aria-labelledby="tab-description"
+      >
+        <div 
+          class="rpp-prose rpp-prose-sm rpp-max-w-none"
+          set:html={product.description}
+        />
+      </div>
+    )}
+
+    {/* Información adicional */}
+    {(product.attributes.length > 0 || product.weight || product.dimensions.length) && (
+      <div
+        id="panel-additional"
+        data-tab-panel="additional"
+        class="rpp-tab-panel rpp-hidden"
+        role="tabpanel"
+        aria-labelledby="tab-additional"
+      >
+        <table class="rpp-w-full rpp-text-sm">
+          <tbody>
+            {product.weight && (
+              <tr class="rpp-border-b">
+                <td class="rpp-py-3 rpp-font-medium rpp-text-gray-900">Peso</td>
+                <td class="rpp-py-3 rpp-text-gray-600">{product.weight} kg</td>
+              </tr>
+            )}
+            
+            {(product.dimensions.length || product.dimensions.width || product.dimensions.height) && (
+              <tr class="rpp-border-b">
+                <td class="rpp-py-3 rpp-font-medium rpp-text-gray-900">Dimensiones</td>
+                <td class="rpp-py-3 rpp-text-gray-600">
+                  {product.dimensions.length} × {product.dimensions.width} × {product.dimensions.height} cm
+                </td>
+              </tr>
+            )}
+            
+            {product.attributes.map((attr) => (
+              <tr class="rpp-border-b">
+                <td class="rpp-py-3 rpp-font-medium rpp-text-gray-900">{attr.name}</td>
+                <td class="rpp-py-3 rpp-text-gray-600">
+                  {attr.options.join(', ')}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+
+    {/* Reseñas */}
+    <div
+      id="panel-reviews"
+      data-tab-panel="reviews"
+      class="rpp-tab-panel rpp-hidden"
+      role="tabpanel"
+      aria-labelledby="tab-reviews"
+    >
+      <div class="rpp-reviews-container">
+        {product.review_count > 0 ? (
+          <>
+            {/* Resumen de reseñas */}
+            <div class="rpp-bg-gray-50 rpp-rounded-lg rpp-p-6 rpp-mb-8">
+              <div class="rpp-flex rpp-items-center rpp-justify-between">
+                <div>
+                  <h3 class="rpp-text-lg rpp-font-medium rpp-mb-2">Valoración media</h3>
+                  <div class="rpp-flex rpp-items-center">
+                    <span class="rpp-text-3xl rpp-font-bold rpp-mr-2">{product.average_rating}</span>
+                    <div class="rpp-flex">
+                      {[...Array(5)].map((_, i) => (
+                        <svg
+                          class={`rpp-w-5 rpp-h-5 ${
+                            i < Math.round(parseFloat(product.average_rating))
+                              ? 'rpp-text-yellow-400'
+                              : 'rpp-text-gray-300'
+                          }`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+                  </div>
+                  <p class="rpp-text-sm rpp-text-gray-600 rpp-mt-1">
+                    Basado en {product.review_count} {product.review_count === 1 ? 'reseña' : 'reseñas'}
+                  </p>
+                </div>
+                
+                <button class="rpp-bg-primary-600 rpp-text-white rpp-px-4 rpp-py-2 rpp-rounded-md hover:rpp-bg-primary-700 rpp-transition-colors">
+                  Escribir una reseña
+                </button>
+              </div>
+            </div>
+
+            {/* Placeholder para lista de reseñas - se cargará dinámicamente */}
+            <div id="reviews-list" data-product-id={product.id}>
+              <p class="rpp-text-gray-600">Cargando reseñas...</p>
+            </div>
+          </>
+        ) : (
+          <div class="rpp-text-center rpp-py-12">
+            <p class="rpp-text-gray-600 rpp-mb-4">Aún no hay reseñas para este producto.</p>
+            <button class="rpp-bg-primary-600 rpp-text-white rpp-px-6 rpp-py-2 rpp-rounded-md hover:rpp-bg-primary-700 rpp-transition-colors">
+              Sé el primero en escribir una reseña
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .rpp-tab-trigger {
+    transition: all 0.2s ease;
+  }
+  
+  .rpp-tab-panel {
+    animation: fadeIn 0.3s ease;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .rpp-prose h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+  
+  .rpp-prose h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+  
+  .rpp-prose p {
+    margin-bottom: 1rem;
+  }
+  
+  .rpp-prose ul, .rpp-prose ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+  }
+  
+  .rpp-prose li {
+    margin-bottom: 0.5rem;
+  }
+</style>
+
+<script>
+  // Funcionalidad de tabs
+  document.addEventListener('DOMContentLoaded', () => {
+    const tabsContainer = document.querySelector('[data-tabs]');
+    if (!tabsContainer) return;
+
+    const triggers = tabsContainer.querySelectorAll('[data-tab-trigger]');
+    const panels = tabsContainer.querySelectorAll('[data-tab-panel]');
+
+    triggers.forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        const targetId = trigger.getAttribute('data-tab-trigger');
+        
+        // Actualizar triggers
+        triggers.forEach(t => {
+          t.classList.remove('rpp-border-primary-500', 'rpp-text-primary-600');
+          t.classList.add('rpp-border-transparent', 'rpp-text-gray-500');
+          t.setAttribute('aria-selected', 'false');
+        });
+        
+        trigger.classList.remove('rpp-border-transparent', 'rpp-text-gray-500');
+        trigger.classList.add('rpp-border-primary-500', 'rpp-text-primary-600');
+        trigger.setAttribute('aria-selected', 'true');
+        
+        // Actualizar panels
+        panels.forEach(panel => {
+          if (panel.getAttribute('data-tab-panel') === targetId) {
+            panel.classList.remove('rpp-hidden');
+          } else {
+            panel.classList.add('rpp-hidden');
+          }
+        });
+
+        // Si es la tab de reseñas, cargar las reseñas
+        if (targetId === 'reviews') {
+          loadReviews();
+        }
+      });
+    });
+
+    // Función para cargar reseñas dinámicamente
+    async function loadReviews() {
+      const reviewsList = document.getElementById('reviews-list');
+      const productId = reviewsList?.getAttribute('data-product-id');
+      
+      if (!reviewsList || !productId) return;
+      
+      try {
+        // Aquí normalmente cargarías las reseñas via API
+        // Por ahora solo mostramos un placeholder
+        reviewsList.innerHTML = `
+          <div class="rpp-space-y-6">
+            <p class="rpp-text-gray-600">Las reseñas se cargarán aquí dinámicamente.</p>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Error loading reviews:', error);
+      }
+    }
+  });
+</script>

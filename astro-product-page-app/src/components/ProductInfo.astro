@@ -1,0 +1,153 @@
+---
+import type { Product } from '@/lib/api';
+
+export interface Props {
+  product: Product;
+}
+
+const { product } = Astro.props;
+
+// Formatear el precio para mostrar
+const formatPrice = (price: string) => {
+  return new Intl.NumberFormat('es-ES', {
+    style: 'currency',
+    currency: 'EUR' // Cambiar según tu moneda
+  }).format(parseFloat(price));
+};
+
+// Calcular porcentaje de descuento
+const discountPercentage = product.on_sale && product.regular_price && product.sale_price
+  ? Math.round(((parseFloat(product.regular_price) - parseFloat(product.sale_price)) / parseFloat(product.regular_price)) * 100)
+  : 0;
+---
+
+<div class="rpp-product-info">
+  <!-- Categorías -->
+  {product.categories.length > 0 && (
+    <div class="rpp-mb-4">
+      {product.categories.map((cat, index) => (
+        <>
+          <a 
+            href={`/product-category/${cat.slug}`}
+            class="rpp-text-sm rpp-text-gray-600 hover:rpp-text-gray-900 rpp-transition-colors"
+          >
+            {cat.name}
+          </a>
+          {index < product.categories.length - 1 && <span class="rpp-mx-2 rpp-text-gray-400">·</span>}
+        </>
+      ))}
+    </div>
+  )}
+
+  <!-- Título -->
+  <h1 class="rpp-text-3xl sm:rpp-text-4xl rpp-font-bold rpp-text-gray-900 rpp-mb-4">
+    {product.name}
+  </h1>
+
+  <!-- Rating -->
+  {product.review_count > 0 && (
+    <div class="rpp-flex rpp-items-center rpp-mb-6">
+      <div class="rpp-flex rpp-items-center">
+        {[...Array(5)].map((_, i) => (
+          <svg
+            class={`rpp-w-5 rpp-h-5 ${
+              i < Math.round(parseFloat(product.average_rating))
+                ? 'rpp-text-yellow-400'
+                : 'rpp-text-gray-300'
+            }`}
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+        ))}
+      </div>
+      <span class="rpp-ml-2 rpp-text-sm rpp-text-gray-600">
+        {product.average_rating} ({product.review_count} {product.review_count === 1 ? 'reseña' : 'reseñas'})
+      </span>
+    </div>
+  )}
+
+  <!-- Precio -->
+  <div class="rpp-mb-6">
+    {product.on_sale ? (
+      <div class="rpp-flex rpp-items-center rpp-gap-3">
+        <span class="rpp-text-3xl rpp-font-bold rpp-text-gray-900">
+          {formatPrice(product.sale_price)}
+        </span>
+        <span class="rpp-text-xl rpp-text-gray-500 rpp-line-through">
+          {formatPrice(product.regular_price)}
+        </span>
+        <span class="rpp-bg-red-100 rpp-text-red-800 rpp-text-sm rpp-font-semibold rpp-px-2 rpp-py-1 rpp-rounded">
+          -{discountPercentage}%
+        </span>
+      </div>
+    ) : (
+      <span class="rpp-text-3xl rpp-font-bold rpp-text-gray-900">
+        {formatPrice(product.price)}
+      </span>
+    )}
+  </div>
+
+  <!-- Descripción corta -->
+  {product.short_description && (
+    <div 
+      class="rpp-prose rpp-prose-sm rpp-text-gray-600 rpp-mb-6"
+      set:html={product.short_description}
+    />
+  )}
+
+  <!-- Stock Status -->
+  <div class="rpp-mb-6">
+    {product.stock_status === 'instock' ? (
+      <div class="rpp-flex rpp-items-center rpp-text-green-600">
+        <svg class="rpp-w-5 rpp-h-5 rpp-mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+        </svg>
+        <span class="rpp-font-medium">En stock</span>
+        {product.stock_quantity && product.stock_quantity <= 10 && (
+          <span class="rpp-ml-2 rpp-text-sm rpp-text-gray-600">
+            (Solo quedan {product.stock_quantity} unidades)
+          </span>
+        )}
+      </div>
+    ) : product.stock_status === 'onbackorder' ? (
+      <div class="rpp-flex rpp-items-center rpp-text-yellow-600">
+        <svg class="rpp-w-5 rpp-h-5 rpp-mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+        </svg>
+        <span class="rpp-font-medium">Disponible por pedido</span>
+      </div>
+    ) : (
+      <div class="rpp-flex rpp-items-center rpp-text-red-600">
+        <svg class="rpp-w-5 rpp-h-5 rpp-mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+        <span class="rpp-font-medium">Agotado</span>
+      </div>
+    )}
+  </div>
+
+  <!-- SKU y Meta -->
+  <div class="rpp-border-t rpp-pt-4 rpp-space-y-2 rpp-text-sm rpp-text-gray-600">
+    {product.sku && (
+      <div>
+        <span class="rpp-font-medium">SKU:</span> {product.sku}
+      </div>
+    )}
+    
+    <!-- Tags -->
+    {product.tags && product.tags.length > 0 && (
+      <div class="rpp-flex rpp-flex-wrap rpp-gap-2 rpp-mt-4">
+        {product.tags.map(tag => (
+          <a
+            href={`/product-tag/${tag.slug}`}
+            class="rpp-inline-block rpp-bg-gray-100 rpp-text-gray-700 rpp-px-3 rpp-py-1 rpp-rounded-full rpp-text-xs hover:rpp-bg-gray-200 rpp-transition-colors"
+          >
+            #{tag.name}
+          </a>
+        ))}
+      </div>
+    )}
+  </div>
+</div>

@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos base para WordPress con prefijo */
+#react-product-root {
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  color: #374151;
+}
+
+#react-product-root * {
+  box-sizing: border-box;
+}
+
+/* Reset para elementos dentro del contenedor de React */
+#react-product-root h1, 
+#react-product-root h2, 
+#react-product-root h3, 
+#react-product-root p {
+  margin: 0;
+  padding: 0;
+}
+
+/* Estilos personalizados para WordPress */
+.rpp-container {
+  @apply rpp-max-w-7xl rpp-mx-auto rpp-px-4;
+}
+
+/* Asegurar que los estilos funcionen en WordPress */
+.rpp-product-gallery img {
+  @apply rpp-w-full rpp-h-auto;
+}
+
+.rpp-product-info h1 {
+  @apply rpp-text-3xl rpp-font-bold rpp-mb-4;
+}
+
+.rpp-product-info .price {
+  @apply rpp-text-2xl rpp-font-semibold rpp-text-green-600;
+}
+
+/* Botón de añadir al carrito */
+.rpp-add-to-cart-btn {
+  @apply rpp-bg-blue-600 hover:rpp-bg-blue-700 rpp-text-white rpp-px-6 rpp-py-3 rpp-rounded-lg rpp-font-medium rpp-transition-colors;
+}
+
+/* Tabs de producto */
+.rpp-product-tabs {
+  @apply rpp-border-b rpp-border-gray-200;
+}
+
+.rpp-product-tab {
+  @apply rpp-px-4 rpp-py-2 rpp-text-gray-600 hover:rpp-text-gray-900 rpp-border-b-2 rpp-border-transparent hover:rpp-border-gray-300;
+}
+
+.rpp-product-tab.active {
+  @apply rpp-text-blue-600 rpp-border-blue-600;
+} 

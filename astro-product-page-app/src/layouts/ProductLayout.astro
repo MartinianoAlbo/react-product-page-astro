@@ -1,0 +1,60 @@
+---
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+
+// Importar estilos globales de Tailwind
+import '../styles/global.css';
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  {description && <meta name="description" content={description} />}
+  
+  <!-- Prevent FOUC -->
+  <style>
+    .rpp-container { opacity: 0; }
+    .rpp-container.loaded { opacity: 1; transition: opacity 0.3s; }
+  </style>
+  
+  <!-- WordPress compatibility styles -->
+  <style>
+    /* Reset algunos estilos de WooCommerce que pueden interferir */
+    #product-content .woocommerce-tabs { display: none; }
+    #product-content .related.products { display: none; }
+    
+    /* Asegurar que nuestros estilos tengan prioridad */
+    #product-content {
+      font-family: inherit;
+      color: inherit;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <slot />
+  
+  <script>
+    // Marcar contenedor como cargado para evitar FOUC
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelector('.rpp-container')?.classList.add('loaded');
+    });
+    
+    // Configurar API con nonce de WordPress
+    if (typeof window !== 'undefined') {
+      const rootElement = document.getElementById('react-product-root');
+      if (rootElement && window.api) {
+        const nonce = rootElement.dataset.nonce || '';
+        window.api.setNonce(nonce);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+---
+// Página dinámica de producto para Astro
+import { api, type Product } from '@/lib/api';
+import ProductLayout from '@/layouts/ProductLayout.astro';
+import ProductGallery from '@/components/ProductGallery.astro';
+import ProductInfo from '@/components/ProductInfo.astro';
+import AddToCart from '@/components/AddToCart';
+import ProductTabs from '@/components/ProductTabs.astro';
+import RelatedProducts from '@/components/RelatedProducts.astro';
+
+// Desactivar pre-renderizado para esta página
+// Esto permite que funcione con cualquier ID de producto
+export const prerender = false;
+
+// Obtener el slug del producto
+const { slug } = Astro.params;
+
+// Validar que el slug existe
+if (!slug) {
+  return Astro.redirect('/404');
+}
+
+// Obtener datos del producto
+let product: Product | null = null;
+let error: string | null = null;
+
+try {
+  // Si estamos en el navegador (desarrollo), configurar el nonce
+  if (typeof window !== 'undefined') {
+    const rootElement = document.getElementById('react-product-root');
+    if (rootElement) {
+      const nonce = rootElement.dataset.nonce || '';
+      api.setNonce(nonce);
+    }
+  }
+  
+  product = await api.getProductBySlug(slug);
+} catch (e) {
+  error = e instanceof Error ? e.message : 'Error loading product';
+  console.error('Error fetching product:', e);
+}
+
+// Si hay error, mostrar mensaje
+if (error || !product) {
+  return Astro.redirect('/404');
+}
+
+// SEO Meta tags
+const seoTitle = `${product.name} - ${Astro.site}`;
+const seoDescription = product.short_description || product.description.substring(0, 160);
+---
+
+<ProductLayout title={seoTitle} description={seoDescription}>
+  <div id="product-content" class="rpp-container rpp-mx-auto rpp-px-4">
+    <!-- Breadcrumbs -->
+    <nav class="rpp-mb-8" aria-label="Breadcrumb">
+      <ol class="rpp-flex rpp-items-center rpp-space-x-2 rpp-text-sm">
+        <li><a href="/" class="rpp-text-gray-500 hover:rpp-text-gray-700">Home</a></li>
+        <li class="rpp-text-gray-400">/</li>
+        <li><a href="/shop" class="rpp-text-gray-500 hover:rpp-text-gray-700">Shop</a></li>
+        {product.categories.map((cat, index) => (
+          <>
+            <li class="rpp-text-gray-400">/</li>
+            <li><a href={`/product-category/${cat.slug}`} class="rpp-text-gray-500 hover:rpp-text-gray-700">{cat.name}</a></li>
+          </>
+        ))}
+        <li class="rpp-text-gray-400">/</li>
+        <li class="rpp-text-gray-900 rpp-font-medium">{product.name}</li>
+      </ol>
+    </nav>
+
+    <!-- Product Grid -->
+    <div class="rpp-grid rpp-grid-cols-1 lg:rpp-grid-cols-2 rpp-gap-12 rpp-mb-16">
+      <!-- Gallery Column -->
+      <div class="rpp-product-gallery">
+        <ProductGallery images={product.images} productName={product.name} />
+      </div>
+
+      <!-- Info Column -->
+      <div class="rpp-product-info">
+        <ProductInfo product={product} />
+        
+        <!-- Add to Cart Component (React Island) -->
+        <div class="rpp-mt-8">
+          <AddToCart 
+            client:load
+            product={product}
+            nonce={Astro.url.searchParams.get('nonce') || ''}
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Details Tabs -->
+    <div class="rpp-mb-16">
+      <ProductTabs product={product} />
+    </div>
+
+    <!-- Related Products -->
+    <div class="rpp-mb-16">
+      <RelatedProducts productId={product.id} />
+    </div>
+  </div>
+
+  <!-- Structured Data for SEO -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": product.name,
+    "description": product.description,
+    "image": product.images[0]?.src,
+    "offers": {
+      "@type": "Offer",
+      "url": Astro.url.href,
+      "priceCurrency": "USD",
+      "price": product.price,
+      "availability": product.stock_status === 'instock' 
+        ? "https://schema.org/InStock" 
+        : "https://schema.org/OutOfStock"
+    },
+    "aggregateRating": product.rating_count > 0 ? {
+      "@type": "AggregateRating",
+      "ratingValue": product.average_rating,
+      "reviewCount": product.review_count
+    } : undefined
+  })} />
+</ProductLayout>

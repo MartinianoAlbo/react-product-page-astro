@@ -1,0 +1,99 @@
+---
+import { api } from '@/lib/api';
+
+export interface Props {
+  productId: number;
+  limit?: number;
+}
+
+const { productId, limit = 4 } = Astro.props;
+
+// Cargar productos relacionados
+let relatedProducts = [];
+try {
+  relatedProducts = await api.getRelatedProducts(productId, limit);
+} catch (error) {
+  console.error('Error loading related products:', error);
+}
+---
+
+{relatedProducts.length > 0 && (
+  <section class="rpp-related-products">
+    <h2 class="rpp-text-2xl rpp-font-bold rpp-mb-6">Productos relacionados</h2>
+    
+    <div class="rpp-grid rpp-grid-cols-2 sm:rpp-grid-cols-3 lg:rpp-grid-cols-4 rpp-gap-6">
+      {relatedProducts.map((product) => (
+        <article class="rpp-product-card rpp-group">
+          <a href={product.permalink} class="rpp-block">
+            {/* Imagen */}
+            <div class="rpp-relative rpp-overflow-hidden rpp-bg-gray-100 rpp-rounded-lg rpp-mb-3">
+              <img
+                src={product.image || '/placeholder.jpg'}
+                alt={product.name}
+                class="rpp-w-full rpp-h-full rpp-object-cover rpp-transition-transform group-hover:rpp-scale-105"
+                loading="lazy"
+              />
+              
+              {/* Badge de oferta si está en descuento */}
+              {product.on_sale && (
+                <span class="rpp-absolute rpp-top-2 rpp-left-2 rpp-bg-red-500 rpp-text-white rpp-text-xs rpp-font-bold rpp-px-2 rpp-py-1 rpp-rounded">
+                  ¡Oferta!
+                </span>
+              )}
+            </div>
+            
+            {/* Info del producto */}
+            <h3 class="rpp-font-medium rpp-text-gray-900 rpp-mb-2 group-hover:rpp-text-primary-600 rpp-transition-colors">
+              {product.name}
+            </h3>
+            
+            {/* Precio */}
+            <div class="rpp-text-lg" set:html={product.price_html} />
+          </a>
+          
+          {/* Botón rápido de añadir al carrito */}
+          <button
+            type="button"
+            class="rpp-mt-3 rpp-w-full rpp-bg-gray-100 rpp-text-gray-900 rpp-py-2 rpp-rounded-md hover:rpp-bg-gray-200 rpp-transition-colors rpp-text-sm rpp-font-medium"
+            data-quick-add
+            data-product-id={product.id}
+          >
+            Vista rápida
+          </button>
+        </article>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .rpp-product-card img {
+    aspect-ratio: 1;
+  }
+  
+  .rpp-product-card:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+  }
+</style>
+
+<script>
+  // Quick add functionality
+  document.addEventListener('DOMContentLoaded', () => {
+    const quickAddButtons = document.querySelectorAll('[data-quick-add]');
+    
+    quickAddButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        const productId = button.getAttribute('data-product-id');
+        
+        // Aquí podrías implementar un modal de vista rápida
+        // Por ahora, redirigir al producto
+        const link = button.closest('.rpp-product-card')?.querySelector('a');
+        if (link) {
+          window.location.href = link.href;
+        }
+      });
+    });
+  });
+</script>
