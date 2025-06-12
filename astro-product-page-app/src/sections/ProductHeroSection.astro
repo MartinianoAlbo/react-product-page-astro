@@ -1,0 +1,37 @@
+---
+import type { Product } from '@/lib/api';
+import ProductGallery from '@/components/ProductGallery.astro';
+import ProductInfo from '@/components/ProductInfo.astro';
+import AddToCart from '@/components/AddToCart';
+
+export interface Props {
+  product: Product;
+  nonce?: string;
+}
+
+const { product, nonce = '' } = Astro.props;
+---
+
+<!-- Product Hero Section: Gallery + Info -->
+<section class="rpp-product-hero rpp-mb-16 rpp-px-10">
+  <div class="rpp-grid rpp-grid-cols-1 lg:rpp-grid-cols-2 rpp-gap-12">
+    <!-- Gallery Column -->
+    <div class="rpp-product-gallery-wrapper">
+      <ProductGallery images={product.images} productName={product.name} />
+    </div>
+
+    <!-- Info Column -->
+    <div class="rpp-product-info-wrapper">
+      <ProductInfo product={product} />
+      
+      <!-- Add to Cart Component (React Island) -->
+      <div class="rpp-mt-8">
+        <AddToCart 
+          client:load
+          product={product}
+          nonce={nonce}
+        />
+      </div>
+    </div>
+  </div>
+</section>

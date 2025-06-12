@@ -52,28 +52,13 @@ const seoDescription = product.short_description || product.description.substrin
 
 <ProductLayout title={seoTitle} description={seoDescription}>
   <div id="product-content" class="rpp-container rpp-mx-auto rpp-px-4">
-    <!-- Breadcrumbs -->
-    <nav class="rpp-mb-8" aria-label="Breadcrumb">
-      <ol class="rpp-flex rpp-items-center rpp-space-x-2 rpp-text-sm">
-        <li><a href="/" class="rpp-text-gray-500 hover:rpp-text-gray-700">Home</a></li>
-        <li class="rpp-text-gray-400">/</li>
-        <li><a href="/shop" class="rpp-text-gray-500 hover:rpp-text-gray-700">Shop</a></li>
-        {product.categories.map((cat, index) => (
-          <>
-            <li class="rpp-text-gray-400">/</li>
-            <li><a href={`/product-category/${cat.slug}`} class="rpp-text-gray-500 hover:rpp-text-gray-700">{cat.name}</a></li>
-          </>
-        ))}
-        <li class="rpp-text-gray-400">/</li>
-        <li class="rpp-text-gray-900 rpp-font-medium">{product.name}</li>
-      </ol>
-    </nav>
+  
 
     <!-- Product Grid -->
     <div class="rpp-grid rpp-grid-cols-1 lg:rpp-grid-cols-2 rpp-gap-12 rpp-mb-16">
       <!-- Gallery Column -->
       <div class="rpp-product-gallery">
-        <ProductGallery images={product.images} productName={product.name} />
+        <ProductGallery client:visible images={product.images} productName={product.name} />
       </div>
 
       <!-- Info Column -->
@@ -92,9 +77,9 @@ const seoDescription = product.short_description || product.description.substrin
     </div>
 
     <!-- Product Details Tabs -->
-    <div class="rpp-mb-16">
+    <!-- <div class="rpp-mb-16">
       <ProductTabs product={product} />
-    </div>
+    </div> -->
 
     <!-- Related Products -->
     <div class="rpp-mb-16">
