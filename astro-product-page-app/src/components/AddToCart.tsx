@@ -67,9 +67,11 @@ export default function AddToCart({ product, nonce }: AddToCartProps) {
 
   const handleAddToCart = async () => {
     setIsLoading(true);
+      console.log(product)
     setMessage(null);
 
     try {
+      console.log(product)
       const variationId = selectedVariation?.id || 0;
       const result = await api.addToCart(
         product.id,
@@ -175,7 +177,7 @@ export default function AddToCart({ product, nonce }: AddToCartProps) {
         <button
           type="button"
           onClick={handleAddToCart}
-          disabled={!canAddToCart}
+          // disabled={!canAddToCart}
           className={`
             rpp-flex-1 rpp-px-6 rpp-py-3 rpp-rounded-md rpp-font-medium rpp-transition-all
             ${canAddToCart
@@ -203,16 +205,6 @@ export default function AddToCart({ product, nonce }: AddToCartProps) {
         </button>
       </div>
 
-      {/* Precio total */}
-      <div className="rpp-text-center rpp-mb-4">
-        <span className="rpp-text-sm rpp-text-gray-600">Total: </span>
-        <span className="rpp-text-lg rpp-font-bold rpp-text-gray-900">
-          {new Intl.NumberFormat('es-ES', {
-            style: 'currency',
-            currency: 'EUR'
-          }).format(parseFloat(currentPrice) * quantity)}
-        </span>
-      </div>
 
       {/* Mensajes */}
       {message && (
@@ -255,29 +247,7 @@ export default function AddToCart({ product, nonce }: AddToCartProps) {
         </div>
       )}
 
-      {/* Información adicional */}
-      <div className="rpp-border-t rpp-pt-4 rpp-mt-6">
-        <ul className="rpp-space-y-2 rpp-text-sm rpp-text-gray-600">
-          <li className="rpp-flex rpp-items-center">
-            <svg className="rpp-w-4 rpp-h-4 rpp-mr-2 rpp-text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            Envío gratis en pedidos superiores a 50€
-          </li>
-          <li className="rpp-flex rpp-items-center">
-            <svg className="rpp-w-4 rpp-h-4 rpp-mr-2 rpp-text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Garantía de satisfacción de 30 días
-          </li>
-          <li className="rpp-flex rpp-items-center">
-            <svg className="rpp-w-4 rpp-h-4 rpp-mr-2 rpp-text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            Pago seguro con cifrado SSL
-          </li>
-        </ul>
-      </div>
+      
     </div>
   );
 }
