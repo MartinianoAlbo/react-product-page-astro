@@ -1,10 +1,15 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
+import fs from 'fs';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 
-// Cargar variables de entorno
 import dotenv from 'dotenv';
 dotenv.config();
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 
 export default defineConfig({
   integrations: [
@@ -33,14 +38,10 @@ export default defineConfig({
   },
 
   // Configuración del servidor de desarrollo de Astro
-  server: {
+  devOptions: {
     port: 3000,
-    host: true, // Habilita acceso desde otras IPs (e.g. tu VPS o red local)
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-WP-Nonce',
-    },
+    hostname: true,
+    
   },
 
   // Configuración de Vite
@@ -58,11 +59,21 @@ export default defineConfig({
       },
     },
     server: {
+      port: 3000,
       cors: true,
+      https: {
+        key:  __dirname + '/key.pem',
+        cert: __dirname + '/cert.pem',
+      },
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-WP-Nonce',
+      },
       proxy: {
         // Proxy para llamadas a la REST API de WP durante el dev
         '/wp-json': {
-          target: process.env.WP_API_URL || 'http://saphirus.local/wp-json',
+          target: process.env.WP_API_URL || 'https://saphirus.local/wp-json',
           changeOrigin: true,
           secure: false,
         },

@@ -42,7 +42,7 @@ const seoTitle = `${product.name} - ${Astro.site}`;
 const seoDescription = product.short_description || product.description.substring(0, 160);
 ---
 
-<ProductLayout title={seoTitle} description={seoDescription} client:load>
+<ProductLayout title={seoTitle} description={seoDescription} >
   <div id="product-content" class="rpp-container rpp-mx-auto rpp-px-4">
   
 

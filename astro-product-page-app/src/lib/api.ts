@@ -1,4 +1,5 @@
 // Cliente API para comunicarse con WordPress
+import https from 'https';
 
 export interface Product {
   id: number;
@@ -73,15 +74,16 @@ export interface Cart {
 const WP_API_URL        = import.meta.env.WP_API_URL as string;          // p.ej. 'http://saphirus.local/wp-json'
 const WC_CONSUMER_KEY   = import.meta.env.WC_CONSUMER_KEY as string;    // tu CK
 const WC_CONSUMER_SECRET= import.meta.env.WC_CONSUMER_SECRET as string; // tu CS
+const devAgent = new https.Agent({ rejectUnauthorized: false });
 
 class WordPressAPI {
   private baseUrl: string;
   private nonce: string;
+  
 
   constructor() {
     this.baseUrl = `${WP_API_URL}/rpp/v1`;
     this.nonce   = '';
-    console.log(this.baseUrl);
   }
 
   setNonce(nonce: string) {
@@ -98,11 +100,18 @@ class WordPressAPI {
       headers.set('X-WP-Nonce', this.nonce);
     }
 
-    const response = await fetch(url, {
+    const fetchOptions: RequestInit & { agent?: https.Agent } = {
       ...options,
       headers,
-      credentials: 'include', // Importante para cookies de WordPress
-    });
+      credentials: 'include',
+    };
+
+    if (import.meta.env.SSR && process.env.NODE_ENV === 'development') {
+      console.log('dev');
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    }
+
+    const response = await fetch(url, fetchOptions);
 
     if (!response.ok) {
       const error = await response.json();
