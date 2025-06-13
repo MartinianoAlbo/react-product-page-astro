@@ -107,7 +107,6 @@ class WordPressAPI {
     };
 
     if (import.meta.env.SSR && process.env.NODE_ENV === 'development') {
-      console.log('dev');
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     }
 

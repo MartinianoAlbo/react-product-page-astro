@@ -50,12 +50,12 @@ const seoDescription = product.short_description || product.description.substrin
     <div class="rpp-grid rpp-grid-cols-1 lg:rpp-grid-cols-2 rpp-gap-12 rpp-mb-16">
       <!-- Gallery Column -->
       <div class="rpp-product-gallery">
-        <ProductGallery client:visible images={product.images} productName={product.name} />
+        <ProductGallery images={product.images} productName={product.name} />
       </div>
 
       <!-- Info Column -->
       <div class="rpp-product-info">
-        <ProductInfo client:visible product={product} />
+        <ProductInfo  product={product} />
         
         <!-- Add to Cart Component (React Island) -->
         <div class="rpp-mt-8">
