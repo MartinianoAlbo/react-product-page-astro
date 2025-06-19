@@ -16,7 +16,9 @@ if (!defined('ABSPATH')) {
 define('RPP_VERSION', '1.0.0');
 define('RPP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('RPP_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('RPP_ASTRO_URL', 'http://localhost:3000'); // URL de desarrollo de Astro
+define('RPP_ASTRO_URL', 'https://astro-wc-product-page.vercel.app/dist');
+define('RPP_ASTRO_DEV_URL', 'https://192.168.0.248:4321/');
+
 
 /**
  * Clase principal del plugin
