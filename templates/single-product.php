@@ -55,7 +55,7 @@ $astro_url = $is_development ? RPP_ASTRO_DEV_URL : RPP_ASTRO_URL;
                 <?php
                 // construyo la URL de Astro y traigo el HTML
                 $astro_page_url = trailingslashit( $astro_url ) . 'product/' . $product_slug;
-                error_log(print_r($astro_page_url, true));
+
                 $resp = wp_remote_get( $astro_page_url, [
                     'timeout'   => 5,
                     'sslverify' => false,
@@ -63,7 +63,7 @@ $astro_url = $is_development ? RPP_ASTRO_DEV_URL : RPP_ASTRO_URL;
                         'Accept' => 'text/html',
                     ],
                 ] );
-                error_log(print_r($resp, true));
+
                 if ( is_wp_error( $resp ) || 200 !== wp_remote_retrieve_response_code( $resp ) ) {
                     $astro_html = false;
                 } else {
@@ -71,6 +71,15 @@ $astro_url = $is_development ? RPP_ASTRO_DEV_URL : RPP_ASTRO_URL;
                 }
 
                 if ( $astro_html ) {
+                    if ( $is_development ) {
+                        // Inject base tag to load assets from Astro dev server
+                        $astro_html = preg_replace(
+                            '/<head>/',
+                            '<head><base href="' . esc_url( trailingslashit( $astro_url ) ) . '">',
+                            $astro_html,
+                            1
+                        );
+                    }
                     echo $astro_html;
                 } else {
                     ?>

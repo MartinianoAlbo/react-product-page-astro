@@ -89,7 +89,7 @@ class React_Product_Page {
     public function handle_cors() {
         // Solo en desarrollo
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            header("Access-Control-Allow-Origin: " . RPP_ASTRO_URL);
+            header("Access-Control-Allow-Origin: " . RPP_ASTRO_DEV_URL);
             header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
             header("Access-Control-Allow-Headers: Content-Type, Authorization, X-WP-Nonce");
             
